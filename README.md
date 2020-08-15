@@ -5,6 +5,8 @@ towards data science:
 
 ---
 
+![Workflow](./screenshots/workflow_monitor_errors.png)
+
 ![Build an Airflow data pipeline to monitor errors](./screenshots/monitor_errors_flow.gif)
 
 ## References
