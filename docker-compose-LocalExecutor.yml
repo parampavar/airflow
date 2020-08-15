@@ -19,12 +19,20 @@ services:
         environment:
             - LOAD_EX=n
             - EXECUTOR=Local
+            - AIRFLOW__WEBSERVER__DAG_DEFAULT_VIEW=graph
+            - AIRFLOW__SMTP__SMTP_HOST=smtp.gmail.com
+            - AIRFLOW__SMTP__SMTP_PORT=587
+            - AIRFLOW__SMTP__SMTP_USER=<your-email-id>@gmail.com
+            - AIRFLOW__SMTP__SMTP_PASSWORD=<your-app-password>
+            - AIRFLOW__SMTP__SMTP_MAIL_FROM=<your-email-id>@gmail.com
         logging:
             options:
                 max-size: 10m
                 max-file: "3"
         volumes:
             - ./dags:/usr/local/airflow/dags
+            - ./data:/usr/local/airflow/data
+            - ~/.ssh:/usr/local/airflow/.ssh
             # - ./plugins:/usr/local/airflow/plugins
         ports:
             - "8080:8080"
