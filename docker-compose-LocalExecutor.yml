@@ -25,6 +25,7 @@ services:
             - AIRFLOW__SMTP__SMTP_USER=<your-email-id>@gmail.com
             - AIRFLOW__SMTP__SMTP_PASSWORD=<your-app-password>
             - AIRFLOW__SMTP__SMTP_MAIL_FROM=<your-email-id>@gmail.com
+            - FERNET_KEY=2gXkJ6lY4J2Gnj6exR9dYiFnWAFHtVXKDmvzpY8skTw=
         logging:
             options:
                 max-size: 10m

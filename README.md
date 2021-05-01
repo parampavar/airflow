@@ -11,3 +11,12 @@ towards data science:
 
 ## References
 https://github.com/puckel/docker-airflow
+
+
+conda activate py382
+
+docker-compose -f ./docker-compose-LocalExecutor.yml up
+
+docker-compose -f ./docker-compose-LocalExecutor.yml down
+
+http://localhost:8080
