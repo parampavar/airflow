@@ -94,7 +94,9 @@ create_table = PostgresOperator(task_id='create_table',
                                 ScannedDate TIMESTAMP NOT NULL,
                                 id uuid,
                                 ManagerId uuid,
-                                ProfileImageAddress VARCHAR(512)
+                                ProfileImageAddress VARCHAR(512),
+                                State VARCHAR (20) NOT NULL,
+                                UserType VARCHAR (20) NOT NULL
                             );'''.format(table_name),
                         dag=dag)
 

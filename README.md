@@ -15,6 +15,8 @@ https://github.com/puckel/docker-airflow
 
 conda activate py382
 
+createuser --host=localhost --port=5432 --username=postgres --password -s -P airflow
+
 docker-compose -f ./docker-compose-LocalExecutor.yml up
 
 docker-compose -f ./docker-compose-LocalExecutor.yml down

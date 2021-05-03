@@ -36,18 +36,11 @@ def save_user_to_database(tablename, records):
     db_conn = db_hook.get_conn()
     db_cursor = db_conn.cursor()
 
-    # #('extApp.log', '22995', '23 Jul 2020', '02:53:13,527', None, 'extApp', 'Unrecognized SSL message, plaintext connection?')
-    # sql = """INSERT INTO {} (FullName, Email, UserName, JobTitle, ScannedDate, id, ManagerId, ProfileImageAddress)
-    #          VALUES (%s, %s, %s, %s, to_timestamp(%s / 1000), %s, %s, %s)""".format(tablename)
-    # # db_cursor.execute(sql, group)
-    # # get the generated id back
-    # # vendor_id = db_cursor.fetchone()[0]
-    # # execute the INSERT statement
-    # db_cursor.executemany(sql, records)
-    print(">>>>>> PRINT INSIDE DAG <<<<<")
     for p in records:
         ManagerId = ""
         ProfileImageAddress = ""
+        State = "ACTIVE"
+        UserType = "USER"
         if 'ManagerId' in p.keys(): 
             ManagerId = p['ManagerId'] 
         else: 
@@ -57,19 +50,22 @@ def save_user_to_database(tablename, records):
         else: 
             JobTitle = ""
         if p['Email'] is None: p['Email'] = p['UserName']
+
+        if p['Email'].lower().startswith('svc') or 
+            p['UserName'].lower().startswith('svc'):
+            UserType = "SERVICE"
         
         print("Inserting " + p['UserName'])
         if 'ProfileImageAddress' in p.keys(): ProfileImageAddress = p['ProfileImageAddress']
         sql = """INSERT INTO {} (FullName, Email, UserName, JobTitle, ScannedDate, id, ManagerId, ProfileImageAddress)
-                VALUES (%s, %s, %s, %s, to_timestamp(%s / 1000), %s, %s, %s)""".format(tablename)
-        db_cursor.execute(sql,(p['FullName'], p['Email'], p['UserName'], JobTitle, p['ScannedDate'], p['id'], ManagerId, ProfileImageAddress))
+                VALUES (%s, %s, %s, %s, to_timestamp(%s / 1000), %s, %s, %s, %s, %s)""".format(tablename)
+        db_cursor.execute(sql,(p['FullName'], p['Email'], p['UserName'], JobTitle, p['ScannedDate'], p['id'], ManagerId, ProfileImageAddress, State, UserType))
 
     db_conn.commit()
 # select * from data_ingest_20210501 where username = 'Diane.B.Comer@kp.org'
     db_cursor.close()
     db_conn.close()
     print(f"  -> {len(records)} records are saved to table: {tablename}.")
-
 
 def parse_log(logString):
     # r = r".+\/(?P<file>.+):(?P<line>\d+):\[\[\]\] (?P<date>.+)/(?P<time>\d{2}:\d{2}:\d{2},\d{3}) ERROR ?(?:SessionId : )?(?P<session>.+)? \[(?P<app>\w+)\] dao\.AbstractSoapDao - (?P<module>(?=[\w]+ -)[\w]+)? - Service Exception: (?P<errMsg>.+)"
