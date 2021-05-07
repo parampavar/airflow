@@ -1,36 +1,15 @@
 from airflow.hooks.postgres_hook import PostgresHook
 import re
 import json
-
-def save_log_to_database(tablename, records):
-    if not records:
-        print("Empty record!")
-        return
-
-    # database hook
-    db_hook = PostgresHook(postgres_conn_id='postgres_default', schema='airflow')
-    db_conn = db_hook.get_conn()
-    db_cursor = db_conn.cursor()
-
-    #('extApp.log', '22995', '23 Jul 2020', '02:53:13,527', None, 'extApp', 'Unrecognized SSL message, plaintext connection?')
-    sql = """INSERT INTO {} (filename, line, date, time, session, app, module, error)
-             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""".format(tablename)
-    # db_cursor.execute(sql, group)
-    # get the generated id back
-    # vendor_id = db_cursor.fetchone()[0]
-    # execute the INSERT statement
-    db_cursor.executemany(sql, records)
-    db_conn.commit()
-
-    db_cursor.close()
-    db_conn.close()
-    print(f"  -> {len(records)} records are saved to table: {tablename}.")
+import logging
 
 def save_user_to_database(tablename, records):
     if not records:
-        print("Empty record!")
+        print("Empty records!")
+        logging.debug("Empty records")
         return
-
+    logging.info(f'Total number of records to insert: {len(records)}')
+ 
     # database hook
     db_hook = PostgresHook(postgres_conn_id='postgres_default', schema='airflow')
     db_conn = db_hook.get_conn()
@@ -51,21 +30,24 @@ def save_user_to_database(tablename, records):
             JobTitle = ""
         if p['Email'] is None: p['Email'] = p['UserName']
 
-        if p['Email'].lower().startswith('svc') or 
-            p['UserName'].lower().startswith('svc'):
+        if p['Email'].lower().startswith('svc') or p['UserName'].lower().startswith('svc'):
             UserType = "SERVICE"
         
         print("Inserting " + p['UserName'])
+        logging.info(f'Inserting: {p["UserName"]}')
+
         if 'ProfileImageAddress' in p.keys(): ProfileImageAddress = p['ProfileImageAddress']
-        sql = """INSERT INTO {} (FullName, Email, UserName, JobTitle, ScannedDate, id, ManagerId, ProfileImageAddress)
+        sql = """INSERT INTO {} (FullName, Email, UserName, JobTitle, ScannedDate, id, ManagerId, ProfileImageAddress, State, UserType)
                 VALUES (%s, %s, %s, %s, to_timestamp(%s / 1000), %s, %s, %s, %s, %s)""".format(tablename)
         db_cursor.execute(sql,(p['FullName'], p['Email'], p['UserName'], JobTitle, p['ScannedDate'], p['id'], ManagerId, ProfileImageAddress, State, UserType))
+        logging.debug(f'Inserted: {p["UserName"]} successfully')
 
     db_conn.commit()
 # select * from data_ingest_20210501 where username = 'Diane.B.Comer@kp.org'
     db_cursor.close()
     db_conn.close()
     print(f"  -> {len(records)} records are saved to table: {tablename}.")
+    logging.info(f"  -> {len(records)} records are saved to table: {tablename}.")
 
 def parse_log(logString):
     # r = r".+\/(?P<file>.+):(?P<line>\d+):\[\[\]\] (?P<date>.+)/(?P<time>\d{2}:\d{2}:\d{2},\d{3}) ERROR ?(?:SessionId : )?(?P<session>.+)? \[(?P<app>\w+)\] dao\.AbstractSoapDao - (?P<module>(?=[\w]+ -)[\w]+)? - Service Exception: (?P<errMsg>.+)"

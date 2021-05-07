@@ -10,7 +10,9 @@ from datetime import datetime, timedelta
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
-    "start_date": datetime(2020, 6, 1),
+    "start_date": datetime.now() - timedelta(minutes=20),  #datetime(2020, 7, 24),
+    "schedule_interval": None,
+    # "start_date": None,
     "email": ["airflow@airflow.com"],
     "email_on_failure": False,
     "email_on_retry": False,
